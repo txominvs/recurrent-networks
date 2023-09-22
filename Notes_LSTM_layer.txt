@@ -1,0 +1,24 @@
+So, in summary, you put `return_sequences=True` when the next layer expects a time-series or sequence as an input, which is the case for a LSTM layer but NOT for a Dense layer.
+
+model = Sequential()
+model.add(LSTM(50, input_shape=(sequence_length, 1), return_sequences=True))
+model.add(LSTM(50, return_sequences=True))
+model.add(LSTM(50, return_sequences=True))
+model.add(LSTM(50))  # next layer does not expect a sequence so return_sequences=False
+model.add(Dense(1))
+model.compile(optimizer='adam', loss='mse')
+model.fit(x_train, y_train, epochs=50, batch_size=16, validation_data=(x_test, y_test))
+
+--------------------------
+
+Each LSTM layer contains a single LSTM cell architecture that is used recursively for each time step in the input sequence. The "number of units" or "size of the hidden state" indeed refers to the dimensionality of the hidden state and cell state of this single LSTM cell.
+
+def LSTM_layer():
+    outputs = []
+
+    lstm_cell = nn.LSTMCell(input_size, hidden_size)
+    for i in range(sequence_length):
+        hx, cx = lstm_cell(inputs[i], (hx, cx))
+    outputs.append(hx)
+
+    output_sequence = torch.stack(outputs)
